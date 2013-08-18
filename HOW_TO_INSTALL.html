@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"  >
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>ساخت گروه_09130246374</title>
+<style>
+body , html{
+margin: 0px;
+	padding:0px;
+	color: #000;
+	font-family: tahoma, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	text-decoration: none;
+ width:100%;
+
+	position:relative;
+
+	background-color: #c0deed;
+
+
+height:100%;
+}
+#main{
+width:900px;
+
+padding:10px;
+margin:0px auto;
+background:#fff;
+color:#000;
+overflow:visible;
+	position:relative;
+	direction:rtl;
+}
+code{
+direction:ltr;
+txt-align:left;
+padding:10px;
+border:dotted 2px #999999;
+background:#dbdedc;
+margin:20px;
+display:inline-block;
+max-height:300px;
+overflow:auto;
+width:95%;
+}
+</style>
+</head>
+
+<body>
+
+<div id="main">
+<div style="background:pink;padding:10px;font-size:14px;">
+قبل از انجام هر تغییر از فایل بک آپ بگیرید <br>
+در کد هایی که در فایل admin_general.php در پوشه controllers قرار میدهید تمام مقادیر $merchantID را به مقدار خود تغییر دهید<br>
+پس از نصب به مدیریت->تنظیمات همگانی رفته و قیمت را تعیین کنید<br><br>
+
+<b>تهیه توسط آرش توانایی - 09130246374 - www.sharetronix.bolur.ir & www.bolur.ir</b>
+</div>
+<center>
+<font color="green" size="4">ساخت گروه با پرداخت : تهیه کننده :آرش توانایی 09130246374</font>
+</center><br><br>
+1- ابتدا فایل ها را در محل مناسب قرار بدید <br>
+2- به فایل system/controllers/groups_new.php بروید و کد زیر را در ابتدا بیابید:<br>
+<code>
+$D->form_type		= 'public';
+</code><br>
+3- بعد از کد بالا کد زیر را قرار دهید<br>
+<code>
+//////////09130246374 -- sharetronix.bolur.ir////////////<br>
+<br>
+	$D->error_pay = false;<br>
+	$D->error_pay_m = '';<br>
+	$D->submit_pay = false;<br>
+
+	if( !$this->user->info->new_group ) {<br>
+		include_once('helpers/nusoap.php');<br>
+	if(isset($_POST['pay_for_group'])){<br>
+	$Amount = intval($C->NEW_GROUP_AMOUNT);<br>
+	$MerchantID = 'XXXX-XXX-XXX-XXX-XXXXXXXXXXXX';<br>
+	$CallbackURL = $C->SITE_URL.'groups/new';<br>
+	//$res = 'ew9843884-edrere-erwevcge453-dfsdfgf';<br>
+	$client = new nusoap_client('https://de.zarinpal.com/pg/services/WebGate/wsdl', 'wsdl');<br>
+	$res = $client->call("PaymentRequest", array(<br>
+													array(<br>
+															'MerchantID' 	=> $MerchantID,<br>
+															'Amount' 		=> $Amount,<br>
+															'Description' 	=> 'ساخت گروه'.$C->SITE_TITLE,<br>
+															'Email' 		=> '',<br>
+															'Mobile' 		=> '',<br>
+															'CallbackURL' 	=> $CallbackURL<br>
+														)<br>
+													)<br>
+	);<br>
+	<br>
+	$this->user->sess['NEW_GROUP_RES'] = $res['Authority'];<br>
+	<br>
+	//Redirect to URL You can do it also by creating a form<br>
+	if($res['Status'] == 100)<br>
+	{<br>
+		$this->redirect('https://www.zarinpal.com/pg/StartPay/'.$res['Authority']);<br>
+	}else{<br>
+		echo'ERR: '.$result['Status'];<br>
+	}<br>
+<br>
+	}<br>
+	if(isset($_GET['Authority']) && $_GET['Authority'] == $this->user->sess['NEW_GROUP_RES'] && $_GET['Status'] == 'OK'){<br>
+
+$Amount = intval($C->NEW_GROUP_AMOUNT);<br>
+$MerchantID = 'XXXX-XXX-XXX-XXX-XXXXXXXXXXXX';<br>
+$Authority = $_GET['Authority'];<br>
+	
+	$client = new nusoap_client('https://de.zarinpal.com/pg/services/WebGate/wsdl', 'wsdl');<br>
+	$res = $client->call("PaymentVerification", array(<br>
+															array(<br>
+																	'MerchantID'	 => $MerchantID,<br>
+																	'Authority' 	 => $Authority,<br>
+																	'Amount'	 	 => $Amount<br>
+																)<br>
+															)<br>
+		);<br>
+<br>
+if($res['Status'] == 100){<br>
+$D->trak = $res['RefID'];<br>
+$db2->query('UPDATE users SET new_group="1" WHERE id="'.$this->user->id.'" LIMIT 1');<br>
+$this->network->get_user_by_id($this->user->id,TRUE);<br>
+
+$D->submit_pay = true;<br>
+	$this->load_template('groups_new.php');<br>
+	return;<br>
+}else{<br>
+	$D->error_pay = true;<br>
+	$D->error_pay_m .= '&lt;br&gt;خطاهای در گاه پرداخت &lt;/br&gt;';<br>
+}
+
+	
+	}else{<br>
+	
+	$D->error_pay = true;<br>
+	$D->error_pay_m .= '&lt;br&gt;پرداخت نا معتبر میباشد .. شاید رفرش کردید&lt;/br&gt;';<br>
+	
+	}
+	
+	
+	
+	
+	
+		$this->load_template('groups_new-pay.php');<br>
+		return;<br>
+	}<br>
+	//////////09130246374 -- sharetronix.bolur.ir////////////<br>
+</code>
+4- در همین فایل کد زیر را با دقت پیدا کنید:
+
+<code>
+$this->redirect( $C->SITE_URL.$g->groupname.'/msg:created' );
+</code>
+
+5- دقیقا قبل از آن کد زیر را بیافزایید
+<code>
+			$db2->query('UPDATE users SET new_group="0" WHERE id="'.$this->user->id.'" LIMIT 1'); <br>
+			$this->network->get_user_by_id($this->user->id,TRUE);<br>
+			$this->user->sess['NEW_GROUP_RES'] = false;<br>
+</code>
+
+6-به system/controllers/admin_general.php رجوع و کد زیر را بیابید:
+
+<code>
+$D->network_name	= $s->SITE_TITLE;
+</code>
+
+7-زیر آن کد زیر را اضافه کنید.
+<code>
+$D->new_group_pay	= $s->NEW_GROUP_AMOUNT;
+</code>
+
+
+
+8- در همین فایل کد زیر را پیدا کنید.
+
+<code>
+$D->post_atch_link	= isset($_POST['atch_link']) && $_POST['atch_link']==1;
+</code>
+
+9- در زیر آن کد زیر را اضافه کنید.
+
+<code>
+$D->new_group_pay	= intval($_POST['new_group_pay']);
+</code>
+
+10- در همین فایل کد زیر را بیابید:
+
+<code>
+$db2->query('REPLACE INTO settings SET word="AUTOCHECK_FOR_UPDATE", value="'.intval($D->check4update).'" ');
+</code>
+
+11- بعد از کد بالا کد زیر را اضافه فرمایید.
+
+<code>
+$db2->query('REPLACE INTO settings SET word="NEW_GROUP_AMOUNT", value="'.intval($D->new_group_pay).'" ');
+</code>
+
+12- به پوشه قالب خود بروید سپس پوشه html و فایل admin_general.php را باز و کد زیر را بیابید 
+(قسمتی را سرچ کنید تا پیدا شود)
+
+<code>
+&lt;tr&gt;<br>
+&lt;td class="setparam"&gt;&lt;?= $this-&gt;lang('admgnrl_frm_email') ?&gt;&lt;/td&gt;<br>
+&lt;td&gt;&lt;input type="text" name="system_email" value="&lt;?= htmlspecialchars($D-&gt;system_email) ?&gt;" class="setinp" maxlength="50" /&gt;&lt;/td&gt;<br>
+&lt;/tr&gt;
+</code>
+
+13- بعد از کد بالا کد زیر را اضافه کنید:
+
+<code>
+&lt;tr&gt;<br>
+&lt;td class="setparam"&gt;هزینه ساخت گروه&lt;/td&gt;<br>
+&lt;td&gt;&lt;input type="text" name="new_group_pay" value="&lt;?= htmlspecialchars($D-&gt;new_group_pay) ?&gt;" class="setinp" maxlength="50" /&gt;&lt;/td&gt;<br>
+&lt;/tr&gt;
+</code>
+
+14- به phpmyadmin بروید و دیتابیس شبکه خود را از سمت چپ انتخاب و در برگه sql در بالا کد زیر را اجرا کنید 
+
+<code>
+INSERT INTO `settings` (
+`word` ,
+`value`
+)
+VALUES (
+'GROUP_NEW_AMOUNT', '0'
+);<br>
+ALTER TABLE `users` ADD `new_group` SMALLINT( 1 ) NOT NULL DEFAULT '0' AFTER `is_network_admin` 
+</code>
+
+
+
+</div>
+</body>
+</html>
